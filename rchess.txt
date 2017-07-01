@@ -1,0 +1,36 @@
+rchess
+
+legality checker
+
+uci interface
+
+. fen parser
+
+move generator
+
+position evaluator
+
+minimax
+
+alphabeta
+
+learning position evaluator
+
+
+testeur de legalite
+
+uci interface
+
+. parser fen
+
+generateur de coup
+
+evaluation posotion
+
+minimax
+
+alphabeta
+
+apprentissage automatique fonction evaluation
+
+
