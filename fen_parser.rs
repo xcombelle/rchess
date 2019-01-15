@@ -21,6 +21,29 @@ struct Piece {
     kind:PieceKind,
     color:Color
 }
+#[derive(Debug,Copy,Clone,Eq,PartialEq)]
+struct Castling {
+    white_queen:bool,
+    white_king:bool,
+    black_king:bool,
+    black_queen:bool
+}
+
+#[derive(Debug,Copy,Clone,Eq,PartialEq)]
+struct Coordinate {
+    x:i8,
+    y:i8,
+}
+
+#[derive(Debug,Copy,Clone,Eq,PartialEq)]
+struct Position {
+    board:[[Piece; 8];8],
+    color_to_play:Color,
+    castling:Castling,
+    enpassant:Coordinate,
+    halfmove_clock:i32,
+    move_number:i32
+}
 fn piece_to_char(piece: Piece) -> char {
 
 
@@ -108,8 +131,8 @@ fn char_array_to_piece_array(array: [[char; 8];8]) -> Result<[[Piece; 8];8],
     return Ok(state)
 }
 
-fn pretty_print(piece_array:[[Piece; 8];8]) {
-    for raw in piece_array.iter() {
+fn pretty_print(position:Position) {
+    for raw in position.board.iter() {
         for &p in raw.iter() {
             print!("{} ",piece_to_char(p));
         }
@@ -117,28 +140,8 @@ fn pretty_print(piece_array:[[Piece; 8];8]) {
     }
 }
 
-/*
 
-example of use
-input:
-"K2R4/p7"
-
-the digits mark the number of empty space (should be between 1 and 8)
-
-output:111
-array 8x8 of char
-
-K..R....
-p.......
-........
-........
-........
-........
-........
-
- */
-
-fn fen_to_char_array(fen:String) -> [[char; 8];8] {
+fn fen_to_char_array(fen:&str) -> [[char; 8];8] {
     let mut i = 0;
     let mut j = 0;
     let mut state=[['.';8]; 8];
@@ -157,13 +160,69 @@ fn fen_to_char_array(fen:String) -> [[char; 8];8] {
     }
     return state
 }
+
+
+/*
+
+example of use
+input:
+"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
+
+the digits mark the number of empty space (should be between 1 and 8)
+
+output:111
+array 8x8 of char
+
+K..R....
+p.......
+........
+........
+........
+........
+........
+
+ */
+
+fn fen_to_position (fen:String) -> Result<Position,String> {
+    
+    let mut pos = fen.split_whitespace();
+    if let Some(toto)=pos.next() {
+        let p = Position{
+        
+            board:match fen_to_piece_array(toto) {
+                Ok(array) => array,
+                Err(error) => return Err(error)
+            },
+        
+            color_to_play:Color::White,
+            castling:Castling{white_queen:false,
+                              white_king:false,
+                              black_queen:false,
+                              black_king:false},
+            enpassant:Coordinate{x:-1,y:-1},
+            halfmove_clock:0,
+            move_number:0
+                
+        
+        };
+        return Ok(p)
+    }
+    else {
+        Err(format!("invalid fen"))
+    }
+}
+
+fn fen_to_piece_array(fen:&str)-> Result<[[Piece; 8];8],String> {
+    
+ char_array_to_piece_array(fen_to_char_array(fen))
+}
 fn main() {
     if let Some(arg) = env::args().nth(1) {
 
-        match char_array_to_piece_array(fen_to_char_array(arg)) {
-            Ok(piece_array) => {
+        match fen_to_position(arg) {
+            Ok(position) => {
                 //println!("{:?}",piece_array);
-                pretty_print(piece_array)
+                pretty_print(position)
             },
             Err(error) => println!("{}",error)
         }
