@@ -153,7 +153,7 @@ impl Position {
             }
             println!();
         }
-        println!("site to move {:#?}",self.active_color);
+        println!("side to move {:#?}",self.active_color);
         println!("castle {:#?} ",self.castling);
         println!("enpassant {:#?}",self.enpassant);
         println!("halfmove {}",self.halfmove);
