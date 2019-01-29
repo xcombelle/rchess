@@ -62,25 +62,19 @@ impl Color {
 impl Piece {
     fn to_char(self) -> char {
 
-
         let c = self.kind.to_char();
         if self.color == Color::Black {
-
-       
             if let Some(lower) = c.to_lowercase().nth(0) {
                 lower
-    
             } else {
                 '.'
-            }
-       
+            }       
         } else {
             c
         }
     }
 
     fn new(c:char)-> Option<Piece>{
-    
         if c.is_lowercase() {
             if let Some(upper)=c.to_uppercase().next() {
                 if let Some(kind) = PieceKind::new(upper) {
@@ -90,7 +84,6 @@ impl Piece {
                     })
                 }
             }
-    
         } else {
             if let Some(kind) = PieceKind::new(c) {
                 return Some(Piece{
@@ -118,7 +111,6 @@ impl PieceKind {
         }
     }
 
-
     fn new(c:char) -> Option<PieceKind> {
         match c {
             '.' => Some(PieceKind::Empty),
@@ -133,6 +125,7 @@ impl PieceKind {
         }
     }
 }
+
 impl PieceArray{
     fn new(array: [[char; 8];8]) -> Result<PieceArray,
                                        String> {
@@ -144,14 +137,13 @@ impl PieceArray{
                     state[i][j] = piece;
                 } else {
                 return Err(format!("unkown piece {:?} at {},{}",c,i,j));
-            }
-            
+            }            
         }
     }
     return Ok(PieceArray(state))
     }
-
 }
+
 impl Position {
     fn pretty_print(self) {
         let PieceArray(board)=self.board;
@@ -166,9 +158,9 @@ impl Position {
         println!("enpassant {:#?}",self.enpassant);
         println!("halfmove {}",self.halfmove);
         println!("fullmove {}",self.fullmove);
-        
     }
 }
+
 impl Coordinate {
     fn new(input:&str)-> Result<Coordinate,String>{
         let e = String::from(input);
@@ -179,11 +171,11 @@ impl Coordinate {
             return Err(String::from("bad en coordinate len!=2"));
         }
         let mut f=e.chars();
-        if let Some(xx) =f.nth(0) {
-            
+
+        if let Some(xx) =f.nth(0) {            
+
             let x= xx as u32 - 'a' as u32;
             if !(x<=7) {
-                
                 return Err(String::from("bad cooridinate column"));
             }  
     
@@ -191,26 +183,22 @@ impl Coordinate {
             if let Some(yy) =f.nth(0) {
                 if let Some(y) = yy.to_digit(10){
                     let mut  z=y as i32 -1;
-                   
                     if !(0<=z && z<=7) {
                         return Err(String::from("bad cooridinate rank"));
                     }
                     Ok(Coordinate{x:x as i8,y:z as i8})
                 } else {
                     return Err(String::from("bad coordinate rank"));
-                }
-            
-                
+                }                
             } else {
                 return Err(String:: from("not found rank"));
-                           
             }
         } else {
               return Err(String:: from("not found column"));
         }
-            
     }
 }
+
 impl Castling {
     fn new(castling:&str)-> Result<Castling,String>{
         let mut cast = Castling{
@@ -233,7 +221,6 @@ impl Castling {
 }
 
 impl Fen {
-
     fn to_char_array(fen:&str) -> [[char; 8];8] {
         let mut i = 0;
         let mut j = 0;
@@ -245,20 +232,16 @@ impl Fen {
 	    } else if c == '/'{
                 i = 0;
 	        j+=1
-
             } else {
 	        state[j][i] = c;   
 	        i+=1;
             }
-            
         }
         return state
     }
 
-
-
     /*
-
+    fn to_position (self) -> Result<Position,String> 
     example of use
     input:
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
@@ -283,19 +266,15 @@ impl Fen {
         let position = fen.split_whitespace().collect::<Vec<&str>>();
         match position.len() {
             6 => {
-                
                 let p = Position{
-                
                     board:match PieceArray::new(Fen::to_char_array(position[0])){
                         Ok(array) => array,
                         Err(error) => return Err(error)
                     },
-                    
                     active_color:match Color::new(position[1]){
                         Ok(color)=>color,
                         Err(error) => return Err(error)
                     },
-                                        
                     castling:match Castling::new(position[2]){
                         Ok(castling)=>castling,
                         Err(error) => return Err(error)
@@ -304,8 +283,6 @@ impl Fen {
                         Ok(enpassant)=>enpassant,
                         Err(error) => return Err(error)
                     },
-
-                    
                     halfmove:
                         if let Ok(m)=position[4].parse() {
                            m
@@ -318,37 +295,21 @@ impl Fen {
                         } else {
                             return Err(String::from("bad full move"))
                         }
-
-                        
-                    
-                        
                 };
                 return Ok(p);
-                
             }
             _=> {
                 return Err(String::from("bad fen number field")); 
             }
         }
     }
-/*
-    fn to_piece_array(self)-> Result<PieceArray,
-                                       String>{
-        let Fen(fen)=self;
-        PieceArray::new(Fen::to_char_array(fen))
-    }
-*/
 }
+
 fn main() {
 
-    let args: Vec<String> = env::args().collect();
-    
+    let args: Vec<String> = env::args().collect();    
     match args.len() {
-        
         2 => {
-            
-        
-        
             match Fen(args[1][..].to_string()).to_position() {
                 Ok(position) => {
                     //println!("{:?}",piece_array);
