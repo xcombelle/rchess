@@ -1,4 +1,6 @@
-#[derive(Copy,Clone)]
+use std::collections::HashMap;
+
+#[derive(Copy,Clone,Hash,Eq,PartialEq,Debug)]
 pub enum PieceKind {
     Empty,
     Pawn,
@@ -9,13 +11,12 @@ pub enum PieceKind {
     Rook,
     Outside
 }
-#[derive(Copy,Clone,PartialEq,Debug)]
+#[derive(Copy,Clone,PartialEq,Eq,Debug,Hash)]
 pub enum Color {
     Black,
     White
 }
-
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,PartialEq,Eq,Debug,Hash)]
 pub struct Piece {
     kind:PieceKind,
     color:Color
@@ -33,10 +34,13 @@ pub struct Coordinate {
     x:i8,
     y:i8,
 }
-#[derive(Copy,Clone)]
-pub struct PieceArray([[Piece; 8];8]);
+#[derive(Clone,Debug)]
+pub struct PieceArray{
+    flat:[[Piece; 8];8],
+    reverse:HashMap<Piece,Coordinate>,
+}
 
-#[derive(Copy,Clone)]
+#[derive(Clone)]
 pub struct Position {
     pub board:PieceArray,
     pub active_color:Color,
@@ -121,40 +125,7 @@ impl PieceKind {
     }
 }
 
-impl PieceArray{
-    pub fn new(array: [[char; 8];8]) -> Result<PieceArray,
-                                       String> {
-        let mut state=[[Piece{kind:PieceKind::Empty,
-                              color:Color::White};8]; 8];
-        for (i,raw) in array.iter().enumerate() {
-            for (j,&c) in raw.iter().enumerate() {
-                if let Some(piece) = Piece::new(c) {
-                    state[i][j] = piece;
-                } else {
-                return Err(format!("unkown piece {:?} at {},{}",c,i,j));
-            }            
-        }
-    }
-    return Ok(PieceArray(state))
-    }
-}
 
-impl Position {
-    pub fn pretty_print(self) {
-        let PieceArray(board)=self.board;
-        for raw in board.iter() {
-            for &p in raw.iter() {
-                print!("{} ",p.to_char());
-            }
-            println!();
-        }
-        println!("side to move {:#?}",self.active_color);
-        println!("castle {:#?} ",self.castling);
-        println!("enpassant {:#?}",self.enpassant);
-        println!("halfmove {}",self.halfmove);
-        println!("fullmove {}",self.fullmove);
-    }
-}
 
 impl Coordinate {
     pub fn new(input:&str)-> Result<Coordinate,String>{
@@ -212,5 +183,47 @@ impl Castling {
             }
         }
         Ok(cast)
+    }
+}
+
+impl PieceArray{
+    pub fn new(array: [[char; 8];8]) -> Result<PieceArray,
+                                       String> {
+        let mut state=[[Piece{kind:PieceKind::Empty,
+                              color:Color::White};8]; 8];
+        let mut reverse = HashMap::<Piece,Coordinate>::new();
+
+
+        
+        for (i,raw) in array.iter().enumerate() {
+            for (j,&c) in raw.iter().enumerate() {
+                if let Some(piece) = Piece::new(c) {
+                    state[i][j] = piece;
+                    reverse.insert(piece,Coordinate{x:i as i8,y:j as i8});
+                    
+                    
+                } else {
+                    return Err(format!("unkown piece {:?} at {},{}",c,i,j));
+                }            
+            }
+        }
+        return Ok(PieceArray{flat:state,reverse:reverse})
+    }
+}
+
+impl Position {
+    pub fn pretty_print(self) {
+        let PieceArray{flat:board,reverse:_}=self.board;
+        for raw in board.iter() {
+            for &p in raw.iter() {
+                print!("{} ",p.to_char());
+            }
+            println!();
+        }
+        println!("side to move {:#?}",self.active_color);
+        println!("castle {:#?} ",self.castling);
+        println!("enpassant {:#?}",self.enpassant);
+        println!("halfmove {}",self.halfmove);
+        println!("fullmove {}",self.fullmove);
     }
 }
